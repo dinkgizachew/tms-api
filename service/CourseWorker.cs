@@ -1,3 +1,5 @@
+using TmsApi.Service;
+
 public class CourseWorker
 {
     private readonly IServiceScopeFactory _scopeFactory;

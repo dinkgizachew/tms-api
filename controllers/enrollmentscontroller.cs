@@ -1,48 +1,97 @@
 using Microsoft.AspNetCore.Mvc;
+using TmsApi.Dtos;
+using TmsApi.Service;
 
 [ApiController]
-[Route("api/enrollments")]
-public class EnrollmentsController : ControllerBase
+[Route("api/courses/{courseId:int}/enrollments")]
+[Tags("Enrollments")]
+[Produces("application/json")]
+[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+public class EnrollmentsController(
+    ICourseService courseService,
+    IEnrollmentService enrollmentService) : ControllerBase
 {
-    private readonly IEnrollmentService _enrollmentService;
-
-    public EnrollmentsController(IEnrollmentService enrollmentService)
+    [HttpGet(Name = "ListCourseEnrollments")]
+    [ProducesResponseType(typeof(IReadOnlyList<EnrollmentResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [EndpointSummary("List enrolments for a course")]
+    public async Task<IActionResult> GetEnrollments(
+        int courseId,
+        CancellationToken ct)
     {
-        _enrollmentService = enrollmentService;
+        var course = await courseService.GetByIdAsync(courseId, ct);
+        if (course is null)
+        {
+            return NotFound();
+        }
+
+        var enrollments = await enrollmentService.GetAllAsync();
+        var result = enrollments
+            .Where(e => e.CourseCode == course.Code)
+            .Select(e => new EnrollmentResponseDto(e.Id, e.StudentId, e.CourseCode, e.EnrolledAt))
+            .ToList();
+
+        return Ok(result);
     }
 
-    // GET /api/enrollments → returns all enrollment records
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
+    [HttpGet("{id:int}", Name = nameof(GetEnrollment))]
+    [ProducesResponseType(typeof(EnrollmentResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Get one enrolment for a course")]
+    public async Task<IActionResult> GetEnrollment(
+        int courseId,
+        int id,
+        CancellationToken ct)
     {
-        var enrollments = await _enrollmentService.GetAllAsync();
-        return Ok(enrollments);
+        var course = await courseService.GetByIdAsync(courseId, ct);
+        if (course is null)
+        {
+            return NotFound();
+        }
+
+        var record = await enrollmentService.GetByIdAsync(id.ToString());
+        if (record is null || record.CourseCode != course.Code)
+        {
+            return NotFound();
+        }
+
+        return Ok(new EnrollmentResponseDto(record.Id, record.StudentId, record.CourseCode, record.EnrolledAt));
     }
 
-    // GET /api/enrollments/{id} → returns one or 404
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(string id)
-    {
-        var record = await _enrollmentService.GetByIdAsync(id);
-        return record is not null ? Ok(record) : NotFound();
-    }
-
-    // POST /api/enrollments → creates and returns 201 with Location header
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateEnrollmentRequest request)
+    [ProducesResponseType(typeof(EnrollmentResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [EndpointSummary("Enrol a student in a course")]
+    [EndpointDescription("Returns 404 if the course does not exist, 409 if the course has reached MaxCapacity.")]
+    public async Task<IActionResult> EnrollStudent(
+        int courseId,
+        EnrollStudentRequest request,
+        CancellationToken ct)
     {
-        var record = await _enrollmentService.EnrollAsync(request.StudentId, request.CourseCode);
-        return CreatedAtAction(nameof(GetById), new { id = record.Id }, record);
-    }
+        var course = await courseService.GetByIdAsync(courseId, ct);
+        if (course is null)
+        {
+            return NotFound();
+        }
 
-    // DELETE /api/enrollments/{id} → returns 204 or 404
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
-    {
-        var deleted = await _enrollmentService.DeleteAsync(id);
-        return deleted ? NoContent() : NotFound();
+        if (course.EnrollmentCount >= course.MaxCapacity)
+        {
+            return Conflict(new ProblemDetails
+            {
+                Title = "Course capacity reached",
+                Detail = $"Course {course.Code} has reached its maximum capacity.",
+                Status = StatusCodes.Status409Conflict
+            });
+        }
+
+        var record = await enrollmentService.EnrollAsync(request.StudentId, course.Code);
+        var response = new EnrollmentResponseDto(record.Id, record.StudentId, record.CourseCode, record.EnrolledAt);
+
+        return CreatedAtAction(
+            nameof(GetEnrollment),
+            new { courseId, id = record.Id },
+            response);
     }
 }
-
-// Request model for POST
-public record CreateEnrollmentRequest(string StudentId, string CourseCode);

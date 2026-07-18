@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\tms-api\\TmsApi\\TmsApi.csproj": {}
+    "C:\\tmsprogect\\tms-api\\tmsapi\\TmsApi.csproj": {}
   },
   "projects": {
-    "C:\\tms-api\\TmsApi\\TmsApi.csproj": {
+    "C:\\tmsprogect\\tms-api\\tmsapi\\TmsApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\tms-api\\TmsApi\\TmsApi.csproj",
+        "projectUniqueName": "C:\\tmsprogect\\tms-api\\tmsapi\\TmsApi.csproj",
         "projectName": "TmsApi",
-        "projectPath": "C:\\tms-api\\TmsApi\\TmsApi.csproj",
+        "projectPath": "C:\\tmsprogect\\tms-api\\tmsapi\\TmsApi.csproj",
         "packagesPath": "C:\\Users\\LENOVO\\.nuget\\packages\\",
-        "outputPath": "C:\\tms-api\\TmsApi\\obj\\",
+        "outputPath": "C:\\tmsprogect\\tms-api\\tmsapi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\LENOVO\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -46,7 +46,17 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "dependencies": {
+            "Microsoft.AspNetCore.OpenApi": {
+              "target": "Package",
+              "version": "[10.0.10, )"
+            },
             "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[10.0.9, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
               "target": "Package",
               "version": "[10.0.9, )"
             },
