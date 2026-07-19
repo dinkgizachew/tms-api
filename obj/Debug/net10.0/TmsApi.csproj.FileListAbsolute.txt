@@ -244,3 +244,7 @@ C:\tmsprogect\tms-api\TmsApi\bin\Debug\net10.0\zh-Hans\Microsoft.CodeAnalysis.Wo
 C:\tmsprogect\tms-api\TmsApi\bin\Debug\net10.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
 C:\tmsprogect\tms-api\tmsapi\bin\Debug\net10.0\dotnet-tools.json
 C:\tmsprogect\tms-api\tmsapi\bin\Debug\net10.0\Microsoft.AspNetCore.OpenApi.dll
+C:\tmsprogect\tms-api\TmsApi\bin\Debug\net10.0\Asp.Versioning.Abstractions.dll
+C:\tmsprogect\tms-api\TmsApi\bin\Debug\net10.0\Asp.Versioning.Http.dll
+C:\tmsprogect\tms-api\TmsApi\bin\Debug\net10.0\Asp.Versioning.Mvc.dll
+C:\tmsprogect\tms-api\TmsApi\bin\Debug\net10.0\Asp.Versioning.Mvc.ApiExplorer.dll
